@@ -127,17 +127,23 @@ The project also includes Angular server-rendering configuration through Express
 
 ## Screenshots
 
-The repository does not currently contain screenshot assets. The following real product views would best document the completed workflow:
+### Weekly Schedule Builder
 
-1. Dashboard with a favorite weekly schedule and upcoming items
-2. Schedule Builder containing courses and recurring personal events
-3. Course search and section-selection interface
-4. Generated candidate schedule options
-5. Schedule difficulty and workload analysis
-6. Detailed course-rating dialog
-7. Original-versus-recommended schedule comparison
+![Weekly Schedule Builder](docs/images/schedule-builder.png)
 
-Future screenshots can be stored under `docs/images/` and embedded here.
+Recurring events, the weekly calendar, and schedule controls in the local frontend.
+
+### Add Event Workflow
+
+![Add Event Workflow](docs/images/add-event.png)
+
+Recurring event creation with a title, description, time range, and selected repeat days.
+
+### Manual Course Entry
+
+![Manual Course Entry](docs/images/manual-course-entry.png)
+
+Manual course entry workflow for adding course and section details directly.
 
 ## My Contribution
 
