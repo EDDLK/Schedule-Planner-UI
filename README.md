@@ -1,69 +1,61 @@
 # Schedule Planner
 
-Schedule Planner is a team-built capstone product developed for CSE 5914 at The Ohio State University. It gives students one place to build weekly schedules, search for course sections, account for recurring personal commitments, compare generated schedule options, and review backend-powered difficulty and workload analysis.
+Schedule Planner is a team-built capstone product developed for CSE 5914 at The Ohio State University. It brings course planning, recurring personal commitments, schedule comparison, and workload analysis into one application.
 
-This repository contains the Angular frontend and its integration with Firebase Authentication and the project's REST API. The backend implementation is not included here.
+This repository contains the Angular and TypeScript frontend, including Firebase Authentication, Google Sign-In, application state, weekly calendar interfaces, and integration with the project's REST API. The backend implementation is not included in this repository.
 
 ## Project Overview
 
-The project approaches schedule planning as more than placing courses on a calendar. Students can combine academic and personal commitments, explore multiple candidate schedules, inspect course-level ratings, and request alternatives when a schedule does not meet their needs.
+Schedule Planner supports the full frontend journey from authentication to a saved weekly plan. Students can search for course sections, combine them with personal events, generate candidate schedules, evaluate estimated difficulty and workload, and request replacement options when a course does not fit their needs.
 
-The frontend supports the complete user workflow: Google authentication, profile management, schedule creation and persistence, course and section selection, recurring events, calendar visualization, analysis results, and recommendation previews.
+The product was developed as an integrated team capstone rather than a standalone classroom UI exercise. Its frontend coordinates authentication, user profiles, persistent schedule data, course information, analysis responses, and deployment configuration.
 
 ## Key Features
 
-- Google Sign-In through Firebase Authentication, with backend user synchronization
-- Create, edit, save, delete, and favorite multiple schedules
+- Sign in with Google through Firebase Authentication and synchronize the user with the backend
+- Create, rename, save, edit, delete, and favorite multiple schedules
 - Search for course sections by course number, campus, and academic term
-- Select a specific section or add a course manually when section data is unavailable
-- Add recurring personal events with descriptions, times, and days of the week
-- Visualize courses and events in an interactive weekly calendar
-- Adjust the visible time range and include or hide weekends
-- Generate and compare multiple candidate schedule options
-- Review schedule difficulty, estimated weekly workload, and total credit hours
-- Open detailed course ratings with workload and difficulty dimensions
-- Request course replacement recommendations and preview proposed schedules side by side
-- View the next five upcoming courses or events from a favorite schedule
-- Build for server rendering or deploy the browser bundle with Docker and Nginx
+- Choose a specific section or use manual course entry
+- Add recurring personal events with descriptions, times, and selected weekdays
+- Display courses and events in an interactive weekly calendar
+- Configure the visible time range and optionally include weekends
+- Generate and compare multiple candidate schedules
+- Review schedule difficulty, estimated weekly workload, and credit hours
+- Inspect detailed course ratings and workload dimensions
+- Request course replacement recommendations and compare proposed schedules
+- Show the next five upcoming items from the user's favorite schedule
+- Build with Angular SSR support or deploy the browser bundle with Docker and Nginx
 
 ## Schedule Analysis and Recommendations
 
-The frontend integrates four backend-powered planning workflows.
+The frontend implements four backend-powered planning workflows.
 
 ### Candidate Schedule Generation
 
-The schedule builder submits the selected courses, recurring events, campus, and term to the backend. Returned schedule candidates appear as selectable options that users can compare, keep, or discard before saving.
+The schedule builder submits courses, recurring events, campus, and term to `POST /generate-schedule/`. Returned schedule candidates are presented as selectable options that users can compare, keep, or discard before saving.
 
 ### Schedule Analysis
 
-Users can submit a schedule for analysis and review the returned:
-
-- Difficulty score
-- Estimated weekly workload
-- Total credit hours
-- Schedule summary
-- Per-course difficulty ratings
-
-The results are presented directly alongside the weekly calendar so users can evaluate schedule structure and workload together.
+The application submits schedules to `POST /generate-schedule/analyze` and renders the returned difficulty score, estimated weekly workload, total credit hours, schedule summary, and per-course ratings alongside the calendar.
 
 ### Course Ratings
 
-Users can request additional details for an individual course and, when available, its instructor. The interface supports:
+The course details experience requests `GET /courses/ratings/{courseId}`, optionally including an instructor name. The UI supports:
 
-- Overall difficulty and estimated weekly time commitment
+- Overall difficulty score and estimated weekly time commitment
 - Rigor, pace, assessment intensity, and project intensity
 - Prerequisites and co-requisites
-- Descriptive tags
+- Descriptive course tags
 - Confidence values
 - Evidence snippets returned by the backend
 
-Course-rating responses are cached in memory to avoid duplicate requests during the same application session.
+Course-rating responses are cached in memory to prevent duplicate requests during the same application session.
 
 ### Course Replacement Recommendations
 
-The alteration workflow lets users select courses they want to replace and describe what they want from an alternative. The frontend sends the current schedule, replacement targets, saved user preferences, and custom criteria to the backend. It then converts the returned recommendations into previewable schedule options and displays the original and proposed calendars side by side before applying a change.
+The alteration workflow lets users select courses to replace and describe what they want from an alternative. The frontend sends the current schedule, selected courses, stored user preferences, and custom criteria to `POST /courses/class-recommendations`. Returned options are converted into previewable schedules and displayed in an original-versus-proposed calendar comparison before the user accepts a change.
 
-The frontend does not run an AI model directly, and the backend implementation is not included in this repository. The code confirms integration with schedule generation, analysis, course-rating, and recommendation endpoints, but it does not establish which AI, machine-learning, or rule-based techniques the backend uses.
+These are backend-powered schedule analysis and recommendation workflows. The frontend does not run an AI model directly, and the backend implementation is not included in this repository. The frontend code does not establish whether the backend uses an AI/ML model, a rules engine, or another algorithmic approach.
 
 ## Tech Stack
 
@@ -74,16 +66,16 @@ The frontend does not run an AI model directly, and the backend implementation i
 - Angular standalone components
 - Angular Signals and RxJS
 - Angular Material
-- SCSS and CSS Grid
 - Angular Router
+- SCSS and CSS Grid
 - Angular SSR with an Express server entry point
 
-### Authentication and Integration
+### Authentication and API Integration
 
 - Firebase Authentication
 - Google Sign-In
 - Angular `HttpClient`
-- REST API integration
+- REST API service layer
 - Browser local storage for the current application user
 
 ### Tooling and Deployment
@@ -92,7 +84,7 @@ The frontend does not run an AI model directly, and the backend implementation i
 - ESLint and Prettier
 - Jasmine and Karma
 - Docker multi-stage build
-- Nginx static hosting and SPA fallback configuration
+- Nginx static hosting with SPA fallback routing
 
 ## Architecture
 
@@ -119,47 +111,47 @@ The frontend does not run an AI model directly, and the backend implementation i
                +-------------------------------------------------------+
 ```
 
-`BackendService` centralizes HTTP requests for users, schedules, course search, generation, analysis, ratings, and recommendations. `ScheduleService` manages the active schedule, saved schedules, favorite selection, and unsaved frontend state. Components consume these services through Angular dependency injection and use Signals for reactive UI state.
+`BackendService` centralizes HTTP requests for users, schedules, course search, generation, analysis, ratings, and recommendations. `ScheduleService` manages the active schedule, saved schedules, favorite selection, and unsaved frontend state. Components consume these services through Angular dependency injection and use Signals for reactive state.
 
-The project includes Angular server-rendering configuration through Express. The provided Docker setup builds the Angular application and serves its browser output through Nginx.
+The project also includes Angular server-rendering configuration through Express. Its Docker configuration builds the application and serves the browser output through Nginx.
 
 ## Main Pages
 
 | Page | Route | Responsibilities |
 | --- | --- | --- |
 | Login | `/login` | Google authentication and backend account synchronization |
-| Dashboard | `/landing` | Favorite schedule, upcoming items, weekly calendar, and schedule summary |
+| Dashboard | `/landing` | Favorite schedule, upcoming items, weekly calendar, and workload summary |
 | My Schedules | `/schedules` | Saved schedule management, editing, deletion, and favorite selection |
 | New Schedule | `/schedule/new` | Schedule creation, course search, events, generation, and analysis |
 | Edit Schedule | `/schedule/edit/:id` | Editing and saving an existing schedule |
 
 ## Screenshots
 
-The repository does not currently include screenshot assets. The following real product views would best document the completed workflow:
+The repository does not currently contain screenshot assets. The following real product views would best document the completed workflow:
 
 1. Dashboard with a favorite weekly schedule and upcoming items
-2. Schedule Builder with courses and recurring personal events
-3. Course search and section-selection dialog
+2. Schedule Builder containing courses and recurring personal events
+3. Course search and section-selection interface
 4. Generated candidate schedule options
 5. Schedule difficulty and workload analysis
 6. Detailed course-rating dialog
 7. Original-versus-recommended schedule comparison
 
-Future screenshots can be stored under `docs/images/` and embedded in this section.
+Future screenshots can be stored under `docs/images/` and embedded here.
 
 ## My Contribution
 
 My primary responsibility was frontend development. I owned major frontend workflows across schedule creation, management, visualization, analysis, and recommendation experiences, integrating these interfaces with backend REST APIs.
 
-My frontend work included the Angular UI, schedule builder, weekly calendar visualization, course and section selection, recurring event management, analysis and recommendation flows, and the client-side service layer connecting these experiences to authentication and backend data.
+My frontend work included the Angular UI, schedule builder, weekly calendar visualization, course and section selection, recurring event management, analysis and recommendation frontend workflows, and the client-side service layer connecting these experiences to authentication and backend data.
 
-This was a collaborative capstone product. Backend services, schedule-generation logic, recommendation logic, and project-wide outcomes were team efforts and are not presented here as individual work.
+This was a collaborative capstone product. I do not present the backend services, AI/ML models, schedule-generation algorithm, recommendation algorithm, or team-wide outcomes as individual work.
 
 ## Team and Capstone Context
 
-Schedule Planner was developed as a complete team capstone product for CSE 5914 at The Ohio State University, rather than as a standalone UI exercise. The repository reflects integration across authentication, persistent user data, course information, schedule management, analysis, and deployment concerns.
+Schedule Planner was developed by a student team for CSE 5914 at The Ohio State University as a complete capstone product spanning frontend experience, backend integration, authentication, persistent data, schedule planning, and deployment.
 
-After the capstone concluded, the project was selected for a **$6,000 university funding offer** to support continued development. The team did not accept or use the funding because the members graduated and did not continue the project.
+The project was selected for a **$6,000 university funding offer to support continued development**. The team did not accept or use the funding because the members graduated and did not continue development after the capstone.
 
 ## Local Setup
 
@@ -168,9 +160,9 @@ After the capstone concluded, the project was selected for a **$6,000 university
 - Node.js 20 or later
 - npm
 - A Firebase project with Google Sign-In enabled
-- Access to a backend implementing the API contracts used by this frontend
+- Access to a backend that implements the API contracts used by this frontend
 
-### Installation
+### Install and Run
 
 ```bash
 git clone https://github.com/EDDLK/Schedule-Planner-UI.git
@@ -178,12 +170,12 @@ cd Schedule-Planner-UI
 npm install
 ```
 
-Review `src/app/environment.ts` and configure:
+Configure `src/app/environment.ts` with:
 
 - `firebaseConfig` for the Firebase project used by the application
 - `apiBaseUrl` for a compatible Schedule Planner backend
 
-Start the development server:
+Start the application locally:
 
 ```bash
 npm start
@@ -220,4 +212,4 @@ This repository contains the frontend application and its API integration layer.
 - AI or machine-learning model code
 - Production usage, accuracy, or performance metrics
 
-Those boundaries are intentional in this README: every technical claim above is based on the frontend implementation contained in this repository or on the documented capstone context.
+Accordingly, this README describes the workflows and integrations that can be verified from the frontend implementation without attributing unverified backend behavior or results.
